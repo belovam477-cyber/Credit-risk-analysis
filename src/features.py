@@ -79,6 +79,27 @@ def aggregate_previous_application(prev_path='data/previous_application.csv'):
 
 
 
+""""Поведение при оплате (просрочки и недоплаты) на основе installments_payments"""
+def aggregate_installments(inst_path='data/installments_payments.csv'):
+    print("Агрегация installments_payments.csv...")
+    inst = pd.read_csv(inst_path)
+
+    # Задержка платежа и недоплата
+    inst['PAYMENT_DELAY'] = inst['DAYS_ENTRY_PAYMENT'] - inst['DAYS_INSTALMENT']
+    inst['PAYMENT_DIFF'] = inst['AMT_PAYMENT'] - inst['AMT_INSTALMENT']
+    inst['IS_LATE'] = (inst['PAYMENT_DELAY'] > 0).astype(int)
+
+    inst_agg = inst.groupby('SK_ID_CURR').agg({
+        'PAYMENT_DELAY': ['max', 'mean', 'sum'],
+        'PAYMENT_DIFF': ['min', 'mean'],
+        'IS_LATE': ['mean', 'sum'],
+        'SK_ID_PREV': ['count']
+    })
+    inst_agg.columns = ['INST_' + '_'.join(col).upper() for col in inst_agg.columns]
+    inst_agg = inst_agg.rename(columns={'INST_SK_ID_PREV_COUNT': 'INST_COUNT'})
+    
+    print(f"Создано {inst_agg.shape[1]} фичей из installments_payments.")
+    return inst_agg.reset_index()
 
 """"Объединяем фичи с 'application_train' по столбцу 'SK_ID_CURR'"""
 if __name__ == "__main__":
@@ -88,11 +109,13 @@ if __name__ == "__main__":
     # Создаем фичи
     bureau_feats = aggregate_bureau()
     prev_feats = aggregate_previous_application()
+    inst_features = aggregate_installments()
     
     # Объединяем по клиенту (left join, чтобы не потерять клиентов без истории)
     print("Объединение таблиц...")
     df_final = app.merge(bureau_feats, on='SK_ID_CURR', how='left')
     df_final = df_final.merge(prev_feats, on='SK_ID_CURR', how='left')
+    df_final = df_final.merge(inst_features, on='SK_ID_CURR', how='left')
     
     print(f"Итоговый размер датасета: {df_final.shape}")
     
