@@ -1,0 +1,21 @@
+# Данные (слишком тяжелые для Git)
+data/
+*.csv
+*.zip
+
+# Модели (бинарные файлы)
+models/
+*.txt
+*.pkl
+*.joblib
+
+# Окружение и кеш
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Системные файлы
+.DS_Store
+Thumbs.db
