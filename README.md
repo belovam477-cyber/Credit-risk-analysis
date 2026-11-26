@@ -102,3 +102,16 @@ python src/train_final.py
 
 # Generate SHAP and Threshold plots
 python src/interpret_final.py
+
+### 🧪 Usage example (inference)
+
+```python
+from src.predict import CreditRiskScorer
+
+scorer = CreditRiskScorer()
+result = scorer.score(sk_id_curr=100002)
+# {
+#   'default_probability': 0.0843,
+#   'decision': 'APPROVE',
+#   'top_risk_factors': [...]
+# }

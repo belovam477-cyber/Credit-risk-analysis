@@ -23,11 +23,9 @@ class CreditRiskScorer:
 
     def _prepare(self, row: pd.DataFrame) -> pd.DataFrame:
         X = row.copy()
-        # Категориальные -> category (как при обучении)
         cat_cols = X.select_dtypes(include='object').columns
         for c in cat_cols:
             X[c] = X[c].astype('category')
-        # Оставляем только те фичи, что видела модель
         X = X.reindex(columns=self.features)
         return X
 
@@ -52,7 +50,6 @@ class CreditRiskScorer:
 
         # SHAP-объяснение для ЭТОГО клиента
         shap_vals = self.explainer.shap_values(X)
-        # Для бинарной классификации SHAP возвращает список [class_0, class_1]
         sv = shap_vals[1][0] if isinstance(shap_vals, list) else shap_vals[0]
         top_idx = np.argsort(np.abs(sv))[::-1][:top_n]
 
