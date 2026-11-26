@@ -102,6 +102,7 @@ python src/train_final.py
 
 # Generate SHAP and Threshold plots
 python src/interpret_final.py
+```
 
 ### 🧪 Usage example (inference)
 
